@@ -1,0 +1,64 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <math.h>
+
+	double b=529.610525;     //kT=0.00094409//
+	double wb=0.006835371;
+	double n=0.29;
+	double r=0.2*wb;
+
+///////////////////////////////////////////////////
+double funj(double w)
+	{
+	double j;
+	
+	j=n*w*wb*wb*wb*wb/((wb*wb-w*w)*(wb*wb-w*w)+4*w*w*r*r);
+	
+	return j;
+	}
+
+//////////////////////////////////////////////////
+double fungr(double t)
+	{
+	double w,gr=0; 
+	
+	for(w=0.0001;w<=0.11;w=w+0.0001)
+		{
+		double valj=funj(w)*(1-cos(w*t))*0.0001/(w*w*tanh(b*w));
+		if(isnan(valj))
+			{
+			printf("Got a w=%lf\n",w);
+			exit(0);
+			}
+
+		gr=gr+valj;
+		}
+	return gr;
+	}
+
+/////////////////////////////////////////////////
+double fungi(double t)
+	{
+	double w,gi=0;
+	
+	for(w=0.0001;w<=0.11;w=w+0.0001)
+	{
+		gi=gi+funj(w)*(sin(w*t)-w*t)*0.0001/(w*w);
+	}
+	
+	return gi;
+	}
+/////////////////////////////////////////////////
+int main(void)
+{
+	double w;
+	
+	for(w=0;w<=0.11;w=w+0.00001)
+		{
+		
+		printf("%lf  %lf\n",w,funj(w));
+		
+		}
+	return 0;
+}
+

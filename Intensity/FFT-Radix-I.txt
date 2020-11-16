@@ -1,0 +1,83 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <math.h>
+#include <gsl/gsl_errno.h>
+#include <gsl/gsl_fft_complex.h>
+
+#define REAL(z,i) ((z)[2*(i)])
+#define IMAG(z,i) ((z)[2*(i)+1])
+
+	double b=529.610525;     //kT=0.00094409//
+	double wb=0.006835371;
+	double n=0.29;
+	double r=0.2*wb;
+
+///////////////////////////////////////////////////
+double funj(double w)
+	{
+	double j;
+
+	j=n*w*wb*wb*wb*wb/((wb*wb-w*w)*(wb*wb-w*w)+4*w*w*r*r);
+
+	return j;
+	}
+
+//////////////////////////////////////////////////
+double fungr(double t)
+	{
+	double w,gr=0;
+
+	for(w=0.0001;w<=0.11;w=w+0.0001)
+		{
+		double valj=funj(w)*(1-cos(w*t))*0.0001/(w*w*tanh(b*w));
+		if(isnan(valj))
+			{
+			printf("Got a w=%lf\n",w);
+			exit(0);
+			}
+
+		gr=gr+valj;
+		}
+	return gr;
+	}
+
+/////////////////////////////////////////////////
+double fungi(double t)
+	{
+	double w,gi=0;
+
+	for(w=0.0001;w<=0.11;w=w+0.0001)
+	{
+		gi=gi+funj(w)*(sin(w*t)-w*t)*0.0001/(w*w);
+	}
+
+	return gi;
+	}
+
+/////////////////////////////////////////////////
+int main(void)
+{
+	int i;
+	double t;
+	double data[2*4096];
+
+	for(i=0;i<4096;i++)
+	{
+		REAL(data,i)=exp(-fungr(t))*cos(fungi(t));
+		IMAG(data,i)=exp(-fungr(t))*sin(fungi(t));
+	}
+
+
+	gsl_fft_complex_radix2_forward (data,1,4096);
+
+	for(i=0;i<4096;i++)
+
+	{
+
+		printf("%d  %lf  %lf\n",i,REAL(data,i),IMAG(data,i));
+
+	}
+
+
+	return 0;
+}
