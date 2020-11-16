@@ -1,4 +1,4 @@
-# Linshape-Study
+# Linshape Study
 
 ## Overview
 
